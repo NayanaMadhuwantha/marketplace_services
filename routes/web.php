@@ -23,9 +23,18 @@ $router->group(['prefix'=>'api'], function () use ($router){
 
     $router->group(['middleware'=>'auth'],function() use ($router){
         $router->post('/logout','AuthController@logout');
+
         $router->get('/posts','PostController@index');
         $router->post('/posts', 'PostController@store');
         $router->put('/posts/{id}', 'PostController@update');
         $router->delete('/posts/{id}', 'PostController@destroy');
+
+        $router->post('/products','ProductController@store');
+        $router->get('/products/{id}','ProductController@show');
+
+        $router->get('/user/currentuser','UserController@getCurrentUser');
     });
+
+
+
 });
