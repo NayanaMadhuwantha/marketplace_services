@@ -60,7 +60,7 @@ $app->singleton(
 */
 
 $app->configure('auth');
-
+$app->configure('service');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -72,13 +72,13 @@ $app->configure('auth');
 |
 */
 
-$app->middleware([
+/*$app->middleware([
     App\Http\Middleware\ExampleMiddleware::class
-]);
+]);*/
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+ $app->routeMiddleware([
+     'auth' => App\Http\Middleware\Authenticate::class,
+ ]);
 
 /*
 |--------------------------------------------------------------------------
