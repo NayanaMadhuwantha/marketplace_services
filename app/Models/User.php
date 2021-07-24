@@ -35,4 +35,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function products(){
         return $this->hasMany(Product::class);
     }
+
+    public function addresses(){
+        return $this->hasMany(AddressBook::class);
+    }
 }

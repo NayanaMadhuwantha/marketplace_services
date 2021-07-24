@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('gender')->nullable();
             $table->string('mobile')->nullable();
             $table->string('telephone')->nullable();
+            $table->enum('role',['admin', 'user'])->default('user');
             $table->string('ProfileImageLink')->nullable();
             $table->string('referralID')->nullable();
             $table->double('rating')->nullable();

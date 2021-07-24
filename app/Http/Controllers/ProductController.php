@@ -19,7 +19,11 @@ class ProductController extends Controller
     {
         try {
             $this->validate($request, [
-                'name' => 'required'
+                'name' => 'required',
+                'description' => 'required',
+                'status' => 'required',
+                'quantity' => 'required',
+                'basePrise' => 'required'
             ]);
 
             $userId = Auth::id();
@@ -65,6 +69,20 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+
+            if ($product->delete()){
+                return response()->json([
+                    'status'=>'success',
+                    'message'=>'Product deleted successfully'
+                ]);
+            }
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AddressBook;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,107 @@ class UserController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Profile updated successfully'
+                ]);
+            }
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function addAddress(Request $request){
+        try {
+            $this->validate($request, [
+                'fullName' => 'required',
+                'mobile' => 'required',
+                'streetAddress1' => 'required',
+                'city' => 'required',
+                'country' => 'required',
+                'zipCode' => 'required',
+            ]);
+
+            $userId = Auth::id();
+            $user = User::find($userId);
+
+            $address = AddressBook::create($request->all());
+            $user->addresses()->save($address);
+
+            if ($user->save()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Address updated successfully',
+                    'address' => $address
+                ]);
+            }
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function getAddresses(Request $request){
+        try {
+            $userId = Auth::id();
+            $user = User::find($userId);
+
+            return $user->addresses;
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function updateAddress(Request $request,$id){
+        try {
+            $this->validate($request, [
+                'fullName' => 'required',
+                'mobile' => 'required',
+                'streetAddress1' => 'required',
+                'city' => 'required',
+                'country' => 'required',
+                'zipCode' => 'required',
+            ]);
+
+            $address = AddressBook::findOrFail($id);
+
+            $address->fullName = $request->fullName;
+            $address->mobile = $request->mobile;
+            $address->streetAddress1 = $request->streetAddress1;
+            $address->city = $request->city;
+            $address->country = $request->country;
+            $address->zipCode = $request->zipCode;
+
+            if($address->save()){
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Address updated successfully',
+                    'address' => $address
+                ]);
+            }
+
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function destroyAddress($id)
+    {
+        try {
+            $address = AddressBook::findOrFail($id);
+
+            if ($address->delete()){
+                return response()->json([
+                    'status'=>'success',
+                    'message'=>'Address deleted successfully'
                 ]);
             }
         }catch (\Exception $e){

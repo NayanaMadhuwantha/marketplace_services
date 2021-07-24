@@ -22,6 +22,7 @@ $router->group(['prefix'=>'api'], function () use ($router){
     $router->post('/login','AuthController@login');
 
     $router->group(['middleware'=>'auth'],function() use ($router){
+
         $router->post('/logout','AuthController@logout');
 
         $router->get('/posts','PostController@index');
@@ -29,12 +30,20 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->put('/posts/{id}', 'PostController@update');
         $router->delete('/posts/{id}', 'PostController@destroy');
 
-        $router->post('/products','ProductController@store');
-        $router->get('/products/{id}','ProductController@show');
+        $router->group(['prefix'=>'user'], function () use ($router){
+            $router->post('/products','ProductController@store');
+            $router->get('/products/{id}','ProductController@show');
 
-        $router->get('/user/currentuser','UserController@getCurrentUser');
-        $router->post('/user/upload/profilepicture','UserController@uploadProfilePicture');
-        $router->post('/user/updateProfile','UserController@updateProfile');
+            $router->get('/currentuser','UserController@getCurrentUser');
+            $router->post('/upload/profilepicture','UserController@uploadProfilePicture');
+            $router->put('/updateprofile','UserController@updateProfile');
+
+            $router->post('/addaddress','UserController@addAddress');
+            $router->delete('/deleteaddress/{id}','UserController@destroyAddress');
+            $router->get('/addresses','UserController@getAddresses');
+            $router->put('/updateaddress/{id}','UserController@updateAddress');
+        });
+
     });
 
 });
