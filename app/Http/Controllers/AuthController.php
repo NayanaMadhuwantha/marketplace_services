@@ -112,4 +112,26 @@ class AuthController extends Controller
             ]);
         }
     }
+
+    public function refreshToken(Request $request){
+        $refresh_token = $request->refresh_token;
+        $client = new Client();
+        try {
+            return $client->post(config('service.passport.login_endpoint'),[
+                "form_params" => [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $refresh_token,
+                    'client_id' => config('service.passport.client_id'),
+                    'client_secret' => config('service.passport.client_secret'),
+                    'scope' => '',
+                ]
+            ])->getBody();
+        }
+        catch (BadResponseException $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }

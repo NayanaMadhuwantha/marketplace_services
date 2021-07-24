@@ -30,18 +30,25 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->put('/posts/{id}', 'PostController@update');
         $router->delete('/posts/{id}', 'PostController@destroy');
 
+        $router->get('/products', 'ProductController@index');
+
         $router->group(['prefix'=>'user'], function () use ($router){
+            $router->post('/refreshtoken','AuthController@refreshToken');
+
             $router->post('/products','ProductController@store');
-            $router->get('/products/{id}','ProductController@show');
+            $router->get('/product/{id}','ProductController@show');
+            $router->get('/products','ProductController@getProductsOfCurrentUser');
+            $router->delete('/product/{id}','ProductController@destroy');
+            $router->post('/updateproduct/{id}','ProductController@update');
 
             $router->get('/currentuser','UserController@getCurrentUser');
             $router->post('/upload/profilepicture','UserController@uploadProfilePicture');
-            $router->put('/updateprofile','UserController@updateProfile');
+            $router->put('/profile','UserController@updateProfile');
 
-            $router->post('/addaddress','UserController@addAddress');
-            $router->delete('/deleteaddress/{id}','UserController@destroyAddress');
+            $router->post('/address','UserController@addAddress');
+            $router->delete('/address/{id}','UserController@destroyAddress');
             $router->get('/addresses','UserController@getAddresses');
-            $router->put('/updateaddress/{id}','UserController@updateAddress');
+            $router->put('/address/{id}','UserController@updateAddress');
         });
 
     });
