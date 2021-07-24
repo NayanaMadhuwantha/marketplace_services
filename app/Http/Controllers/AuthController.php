@@ -47,11 +47,10 @@ class AuthController extends Controller
     }
 
     public function register(Request $request){
-        $name = $request->name;
         $email = $request->email;
         $password = $request->password;
 
-        if (empty($email) or empty($name) or empty($password)){
+        if (empty($email) or empty($password)){
             return response()->json([
                 'status' => 'error',
                 'message' => 'You must fill all the fields'
@@ -77,7 +76,6 @@ class AuthController extends Controller
         }
         try {
             $user = new User();
-            $user->name = $name;
             $user->email = $email;
             $user->password = app('hash')->make($password);
             if ($user->save()){

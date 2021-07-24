@@ -35,6 +35,6 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->get('/user/currentuser','UserController@getCurrentUser');
     });
 
-
+    $router->post('/user/upload/profilepicture','UserController@uploadProfilePicture');
 
 });
