@@ -12,8 +12,12 @@ class Product extends Model
         'specifications',
         'status',
         'quantity',
+        'rating',
+        'popularity',
+        'trending',
         'basePrise',
-        'currentPrice'
+        'currentPrice',
+        'user_id'
     ];
 
     public function user(){

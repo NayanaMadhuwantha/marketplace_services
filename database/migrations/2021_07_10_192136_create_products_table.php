@@ -20,6 +20,9 @@ class CreateProductsTable extends Migration
             $table->string('specifications')->nullable();
             $table->enum('status',['available','soldOut']);
             $table->integer('quantity');
+            $table->double('rating')->nullable();
+            $table->integer('popularity')->nullable();
+            $table->integer('trending')->nullable();
             $table->integer('basePrise')->nullable();
             $table->integer('currentPrice');
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();

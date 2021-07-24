@@ -78,6 +78,7 @@ class AuthController extends Controller
             $user = new User();
             $user->email = $email;
             $user->password = app('hash')->make($password);
+            $user->referralID = sha1(time());
             if ($user->save()){
                 return response()->json([
                     'status' => 'success',

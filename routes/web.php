@@ -33,8 +33,8 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->get('/products/{id}','ProductController@show');
 
         $router->get('/user/currentuser','UserController@getCurrentUser');
+        $router->post('/user/upload/profilepicture','UserController@uploadProfilePicture');
+        $router->post('/user/updateProfile','UserController@updateProfile');
     });
-
-    $router->post('/user/upload/profilepicture','UserController@uploadProfilePicture');
 
 });

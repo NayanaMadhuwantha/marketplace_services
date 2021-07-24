@@ -23,8 +23,9 @@ class CreateUsersTable extends Migration
             $table->string('gender')->nullable();
             $table->string('mobile')->nullable();
             $table->string('telephone')->nullable();
+            $table->string('ProfileImageLink')->nullable();
             $table->string('referralID')->nullable();
-            $table->string('rating')->nullable();
+            $table->double('rating')->nullable();
             $table->timestamps();
         });
     }
