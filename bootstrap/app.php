@@ -72,9 +72,9 @@ $app->configure('service');
 |
 */
 
-/*$app->middleware([
-    App\Http\Middleware\ExampleMiddleware::class
-]);*/
+$app->middleware([
+    App\Http\Middleware\CorsMiddleware::class
+]);
 
  $app->routeMiddleware([
      'auth' => App\Http\Middleware\Authenticate::class,
@@ -97,6 +97,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
+$app->register(\App\Providers\CatchAllOptionsRequestsProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

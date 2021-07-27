@@ -17,8 +17,7 @@ class Product extends Model
         'trending',
         'basePrise',
         'currentPrice',
-        'thumbnailLink',
-        'user_id'
+        'thumbnailLink'
     ];
 
     public function user(){

@@ -32,6 +32,22 @@ $router->group(['prefix'=>'api'], function () use ($router){
 
         $router->get('/products', 'ProductController@index');
 
+        $router->group(['prefix'=>'products'], function () use ($router){
+            //Product Categories
+            $router->post('/category', 'ProductCategoryController@storeCategory');
+            $router->get('/category', 'ProductCategoryController@getCategories');
+            $router->get('/category/{id}', 'ProductCategoryController@showCategory');
+            $router->put('/category/{id}', 'ProductCategoryController@updateCategory');
+            $router->delete('/category/{id}', 'ProductCategoryController@deleteCategory');
+
+            //Product Sub Categories
+            $router->post('/{categoryId}/subcategory', 'ProductCategoryController@storeSubCategory');
+            $router->get('/{categoryId}/subcategory', 'ProductCategoryController@getSubCategories');
+            $router->get('/{categoryId}/subcategory/{id}', 'ProductCategoryController@showSubCategory');
+            $router->put('/{categoryId}/subcategory/{id}', 'ProductCategoryController@updateSubCategory');
+            $router->delete('/{categoryId}/subcategory/{id}', 'ProductCategoryController@deleteSubCategory');
+        });
+
         $router->group(['prefix'=>'user'], function () use ($router){
             $router->post('/refreshtoken','AuthController@refreshToken');
 
