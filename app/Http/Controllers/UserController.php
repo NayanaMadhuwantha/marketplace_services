@@ -33,7 +33,7 @@ class UserController extends Controller
                     return response()->json([
                         'status'=>'success',
                         'message'=>'Profile picture uploaded successfully',
-                        'file_path'=>$filePath
+                        'file_path'=>env("APP_URL")."/".$filePath
                     ]);
                 }
             }
@@ -102,12 +102,35 @@ class UserController extends Controller
         }
     }
 
-    public function getAddresses(Request $request){
+    public function getAddresses(){
         try {
             $userId = Auth::id();
             $user = User::find($userId);
 
             return $user->addresses;
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function getAddress($id){
+        try {
+            $userId = Auth::id();
+            $user = User::find($userId);
+
+            foreach ($user->addresses as $address) {
+                if($address->id==$id){
+                    return $address;
+                }
+            }
+            return response()->json([
+                'status'=>'error',
+                'message'=>'no address found'
+            ]);
+
         }catch (\Exception $e){
             return response()->json([
                 'status'=>'error',

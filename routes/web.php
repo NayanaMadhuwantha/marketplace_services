@@ -64,7 +64,7 @@ $router->group(['prefix'=>'api'], function () use ($router){
             $router->post('/address','UserController@addAddress');
             $router->delete('/address/{id}','UserController@destroyAddress');
             $router->get('/addresses','UserController@getAddresses');
-            //get address api must be added
+            $router->get('/address/{id}','UserController@getAddress');
             $router->put('/address/{id}','UserController@updateAddress');
         });
 
