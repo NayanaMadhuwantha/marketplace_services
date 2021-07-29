@@ -12,7 +12,11 @@ class ProductController extends Controller
 
     public function index()
     {
-        return Product::paginate(20);
+        $products = Product::paginate(20);
+        foreach ($products as $product){
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        }
+        return $products;
     }
 
     public function store(Request $request)
@@ -42,9 +46,6 @@ class ProductController extends Controller
                 'specifications'=>$request->specifications,
                 'status'=>$request->status,
                 'quantity'=>$request->quantity,
-                'rating'=>$request->rating,
-                'popularity'=>$request->popularity,
-                'trending'=>$request->trending,
                 'basePrise'=>$request->basePrise,
                 'thumbnailLink'=>$filePath,
                 'currentPrice'=>$request->currentPrice,
@@ -53,6 +54,7 @@ class ProductController extends Controller
             $user->products()->save($product);
 
             if (!empty($product)){
+                $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
                 return response()->json([
                     'status'=>'success',
                     'message'=>'Product created successfully',
@@ -75,7 +77,9 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        return Product::find($id);
+        $product = Product::find($id);
+        $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        return $product;
     }
 
     public function update(Request $request, $id)
@@ -87,7 +91,7 @@ class ProductController extends Controller
                 'status' => 'required',
                 'quantity' => 'required',
                 'currentPrice' => 'required',
-                'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000'
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|max:1000'
             ]);
 
             $product = Product::findorfail($id);
@@ -99,22 +103,22 @@ class ProductController extends Controller
                 ]);
             }
 
-            $file = $request->file('thumbnail');
-            $filePath = $file->store('public/product_thumbnails');
-
             $product->name=$request->name;
             $product->description=$request->description;
             $product->specifications=$request->specifications;
             $product->status=$request->status;
             $product->quantity=$request->quantity;
-            $product->rating=$request->rating;
-            $product->popularity=$request->popularity;
-            $product->trending=$request->trending;
             $product->basePrise=$request->basePrise;
             $product->currentPrice=$request->currentPrice;
-            $product->thumbnailLink=$filePath;
+
+            $file = $request->file('thumbnail');
+            if ($file){
+                $filePath = $file->store('public/product_thumbnails');
+                $product->thumbnailLink=$filePath;
+            }
 
             if ($product->save()){
+                $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
                 return response()->json([
                     'status'=>'success',
                     'message'=>'Product updated successfully',
@@ -156,6 +160,10 @@ class ProductController extends Controller
 
     public function getProductsOfCurrentUser(){
         $user = User::getCurrentUser();
-        return $user->products()->paginate(20);
+        $products = $user->products()->paginate(20);
+        foreach ($products as $product){
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        }
+        return $products;
     }
 }

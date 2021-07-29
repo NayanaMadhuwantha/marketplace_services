@@ -51,11 +51,11 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->group(['prefix'=>'user'], function () use ($router){
             $router->post('/refreshtoken','AuthController@refreshToken');
 
-            $router->post('/products','ProductController@store');
+            $router->post('/product','ProductController@store');
             $router->get('/product/{id}','ProductController@show');
             $router->get('/products','ProductController@getProductsOfCurrentUser');
             $router->delete('/product/{id}','ProductController@destroy');
-            $router->post('/updateproduct/{id}','ProductController@update');
+            $router->post('/updateProduct/{id}','ProductController@update');
 
             $router->get('/currentuser','UserController@getCurrentUser');
             $router->post('/upload/profilepicture','UserController@uploadProfilePicture');
@@ -64,6 +64,7 @@ $router->group(['prefix'=>'api'], function () use ($router){
             $router->post('/address','UserController@addAddress');
             $router->delete('/address/{id}','UserController@destroyAddress');
             $router->get('/addresses','UserController@getAddresses');
+            //get address api must be added
             $router->put('/address/{id}','UserController@updateAddress');
         });
 
