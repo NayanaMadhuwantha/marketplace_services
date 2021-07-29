@@ -95,8 +95,17 @@ class ProductCategoryController extends Controller
                 'description'=>$request->description
             ]);
 
-            $category = ProductCategory::findorfail($categoryId);
-            $category->subCategory()->save($category);
+            $category = ProductCategory::find($categoryId);
+
+            if ($category){
+                $category->subCategory()->save($category);
+            }
+            else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'No category for id '.$categoryId
+                ]);
+            }
 
             if ($subCategory){
                 return response()->json([
