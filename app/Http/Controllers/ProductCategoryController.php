@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductCategoryController extends Controller
 {
@@ -19,9 +20,15 @@ class ProductCategoryController extends Controller
     }
     public function storeCategory(Request $request){
         try {
-            $this->validate($request, [
-                'name' => 'required'
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|unique:product_categories'
             ]);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
+
             $category = ProductCategory::create([
                 'name'=>$request->name,
                 'description'=>$request->description
@@ -44,14 +51,26 @@ class ProductCategoryController extends Controller
 
     public function updateCategory(Request $request,$id){
         try {
-            $this->validate($request, [
-                'name' => 'required'
+            $category = ProductCategory::find($id);
+            if (!$category){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Category not found for id '.$id
+                ]);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|unique:product_categories,name,'.$category->id
             ]);
-            $category = ProductCategory::findorfail($id);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
+
             $category->name = $request->name;
             $category->description = $request->description;
 
-            if ($category->save()){
+            if ($category->update()){
                 return response()->json([
                     'status'=>'success',
                     'message'=>'Category updated successfully',
@@ -87,9 +106,14 @@ class ProductCategoryController extends Controller
 
     public function storeSubCategory(Request $request,$categoryId){
         try {
-            $this->validate($request, [
+            $validator = Validator::make($request->all(), [
                 'name' => 'required'
             ]);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
+
             $subCategory = ProductSubCategory::create([
                 'name'=>$request->name,
                 'description'=>$request->description

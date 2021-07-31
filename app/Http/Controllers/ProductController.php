@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -22,14 +23,18 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
-            $this->validate($request, [
+            $validator = Validator::make($request->all(), [
                 'name' => 'required',
                 'description' => 'required',
-                'status' => 'required',
+                'status' => 'required|in:available,soldOut',
                 'quantity' => 'required',
                 'currentPrice' => 'required',
                 'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000'
             ]);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
 
             $user = User::getCurrentUser();
 
@@ -78,6 +83,12 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::find($id);
+        if (!$product){
+            return response()->json([
+                'status'=>'error',
+                'message'=>'Product not found for id '.$id
+            ]);
+        }
         $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
         return $product;
     }
@@ -85,16 +96,27 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $this->validate($request, [
+            $product = Product::find($id);
+
+            if (!$product){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product not found for id '.$id
+                ]);
+            }
+
+            $validator = Validator::make($request->all(), [
                 'name' => 'required',
                 'description' => 'required',
-                'status' => 'required',
+                'status' => 'required|in:available,soldOut',
                 'quantity' => 'required',
                 'currentPrice' => 'required',
-                'thumbnail' => 'mimes:jpeg,jpg,png,gif|max:1000'
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000'
             ]);
 
-            $product = Product::findorfail($id);
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
 
             if($product->user->id!=User::getCurrentUser()->id){
                 return response()->json([
