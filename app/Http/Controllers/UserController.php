@@ -88,6 +88,9 @@ class UserController extends Controller
             $user->addresses()->save($address);
 
             if ($user->save()) {
+                if ($request->primary == 1) {
+                    $this->removeOtherAddressesAsPrimary($address);
+                }
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Address updated successfully',
@@ -148,6 +151,7 @@ class UserController extends Controller
                 'city' => 'required',
                 'country' => 'required',
                 'zipCode' => 'required',
+                'primary' => 'boolean'
             ]);
 
             $address = AddressBook::findOrFail($id);
@@ -155,11 +159,18 @@ class UserController extends Controller
             $address->fullName = $request->fullName;
             $address->mobile = $request->mobile;
             $address->streetAddress1 = $request->streetAddress1;
+            $address->streetAddress2 = $request->streetAddress2;
             $address->city = $request->city;
+            $address->state = $request->state;
             $address->country = $request->country;
             $address->zipCode = $request->zipCode;
+            $address->primary = $request->primary;
 
             if($address->save()){
+                if ($request->primary == 1) {
+                    $this->removeOtherAddressesAsPrimary($address);
+                }
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Address updated successfully',
@@ -191,6 +202,20 @@ class UserController extends Controller
                 'status'=>'error',
                 'message'=>$e->getMessage()
             ]);
+        }
+    }
+
+    public function removeOtherAddressesAsPrimary($currentAddress){
+        $userId = Auth::id();
+        $user = User::find($userId);
+
+        foreach ($user->addresses as $userAddress) {
+            if($userAddress->id == $currentAddress->id){
+                continue;
+            }
+            $userAddress = AddressBook::find($userAddress->id);
+            $userAddress->primary = 0;
+            $userAddress->save();
         }
     }
 }
