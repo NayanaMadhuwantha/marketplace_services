@@ -14,4 +14,9 @@ class ProductSubCategory extends Model
     public function category(){
         return $this->belongsTo(ProductCategory::class);
     }
+
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
+
 }

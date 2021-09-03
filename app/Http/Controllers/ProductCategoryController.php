@@ -12,11 +12,17 @@ class ProductCategoryController extends Controller
 {
     public function getCategories()
     {
-        return ProductCategory::all();
+        $categories = ProductCategory::all();
+        foreach ($categories as $category){
+            $subCategories = $category->subCategories;
+        }
+        return $categories;
     }
     public function showCategory($id)
     {
-        return ProductCategory::find($id);
+        $category = ProductCategory::find($id);
+        $subCategories = $category->subCategories;
+        return $category;
     }
     public function storeCategory(Request $request){
         try {
@@ -106,23 +112,40 @@ class ProductCategoryController extends Controller
 
     public function storeSubCategory(Request $request,$categoryId){
         try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required'
-            ]);
-
-            if ($validator->fails()) {
-                return $validator->errors();
-            }
-
-            $subCategory = ProductSubCategory::create([
-                'name'=>$request->name,
-                'description'=>$request->description
-            ]);
-
             $category = ProductCategory::find($categoryId);
-
             if ($category){
-                $category->subCategory()->save($category);
+
+                $validator = Validator::make($request->all(), [
+                    'name' => 'required'
+                ]);
+
+                if ($validator->fails()) {
+                    return $validator->errors();
+                }
+
+                $subCategories = $category->subCategories;
+                foreach ($subCategories as $subCategory){
+                    if($subCategory->name == $request->name){
+                        return response()->json([
+                            'status'=>'error',
+                            'message'=>'The sub category name has already been taken'
+                        ]);
+                    }
+                }
+
+                $subCategory = ProductSubCategory::create([
+                    'name'=>$request->name,
+                    'description'=>$request->description
+                ]);
+
+                if ($category->subCategories()->save($subCategory)){
+                    return response()->json([
+                        'status'=>'success',
+                        'message'=>'Sub Category created successfully',
+                        'category'=>$subCategory
+                    ]);
+                }
+
             }
             else{
                 return response()->json([
@@ -131,11 +154,53 @@ class ProductCategoryController extends Controller
                 ]);
             }
 
-            if ($subCategory){
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function getSubCategories($categoryId){
+        try {
+            $category = ProductCategory::find($categoryId);
+            if ($category){
+                $subCategories = $category->subCategories;
+                return $subCategories;
+            }
+            else{
                 return response()->json([
-                    'status'=>'success',
-                    'message'=>'Sub Category created successfully',
-                    'category'=>$subCategory
+                    'status'=>'error',
+                    'message'=>'No category for id '.$categoryId
+                ]);
+            }
+
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function showSubCategory($categoryId,$id){
+        try {
+            $category = ProductCategory::find($categoryId);
+            if ($category){
+                if($category->subCategories->find($id)){
+                    return $category->subCategories->find($id);
+                }
+
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'No sub category for id '.$id
+                ]);
+            }
+            else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'No category for id '.$categoryId
                 ]);
             }
 

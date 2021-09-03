@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAddressBooksTable extends Migration
+class CreateCartsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,11 @@ class CreateAddressBooksTable extends Migration
      */
     public function up()
     {
-        Schema::create('address_books', function (Blueprint $table) {
+        Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->string('fullName');
-            $table->string('mobile');
-            $table->string('streetAddress1');
-            $table->string('streetAddress2')->nullable();
-            $table->string('city');
-            $table->string('state')->nullable();
-            $table->string('country');
-            $table->string('zipCode');
-            $table->boolean('primary')->nullable();
+            $table->integer('quantity')->default(1);
+            $table->unsignedBigInteger('product_id')->unsigned()->nullable();
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
@@ -37,6 +31,6 @@ class CreateAddressBooksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('address_books');
+        Schema::dropIfExists('carts');
     }
 }

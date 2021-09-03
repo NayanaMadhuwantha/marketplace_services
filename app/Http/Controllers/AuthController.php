@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Cart;
 use App\Models\Post;
 use App\Models\User;
 use GuzzleHttp\Exception\BadResponseException;
@@ -79,6 +80,7 @@ class AuthController extends Controller
             $user->email = $email;
             $user->password = app('hash')->make($password);
             $user->referralID = sha1(time());
+
             if ($user->save()){
                 return response()->json([
                     'status' => 'success',

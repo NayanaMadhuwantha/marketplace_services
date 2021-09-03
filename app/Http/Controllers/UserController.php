@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     public function getCurrentUser(Request $request){
-        $userId = Auth::id();
-        return User::find($userId);
+        $user = User::find(Auth::id());
+        $profileImagePath = $user->ProfileImageLink;
+        $user->ProfileImageLink=env("APP_URL")."/".$profileImagePath;
+        return $user;
     }
 
     public function uploadProfilePicture(Request $request){

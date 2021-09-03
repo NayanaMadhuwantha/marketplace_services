@@ -21,6 +21,11 @@ $router->group(['prefix'=>'api'], function () use ($router){
     $router->post('/register','AuthController@register');
     $router->post('/login','AuthController@login');
 
+    $router->get('/products', 'ProductController@index');
+    $router->get('/products/categories', 'ProductCategoryController@getCategories');
+    $router->get('/product/{id}','ProductController@show');
+    $router->get('/product/{categoryId}/{subcategoryId}','ProductController@getProductsByCategory');
+
     $router->group(['middleware'=>'auth'],function() use ($router){
 
         $router->post('/logout','AuthController@logout');
@@ -30,29 +35,28 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->put('/posts/{id}', 'PostController@update');
         $router->delete('/posts/{id}', 'PostController@destroy');
 
-        $router->get('/products', 'ProductController@index');
-
         $router->group(['prefix'=>'products'], function () use ($router){
             //Product Categories
             $router->post('/category', 'ProductCategoryController@storeCategory');
-            $router->get('/category', 'ProductCategoryController@getCategories');
             $router->get('/category/{id}', 'ProductCategoryController@showCategory');
             $router->put('/category/{id}', 'ProductCategoryController@updateCategory');
             $router->delete('/category/{id}', 'ProductCategoryController@deleteCategory');
 
             //Product Sub Categories
             $router->post('/{categoryId}/subcategory', 'ProductCategoryController@storeSubCategory');
-            $router->get('/{categoryId}/subcategory', 'ProductCategoryController@getSubCategories');
+            $router->get('/{categoryId}/subcategories', 'ProductCategoryController@getSubCategories');
             $router->get('/{categoryId}/subcategory/{id}', 'ProductCategoryController@showSubCategory');
-            $router->put('/{categoryId}/subcategory/{id}', 'ProductCategoryController@updateSubCategory');
-            $router->delete('/{categoryId}/subcategory/{id}', 'ProductCategoryController@deleteSubCategory');
+
+            //later
+            //$router->put('/{categoryId}/subcategory/{id}', 'ProductCategoryController@updateSubCategory');
+            //$router->delete('/{categoryId}/subcategory/{id}', 'ProductCategoryController@deleteSubCategory');
         });
 
         $router->group(['prefix'=>'user'], function () use ($router){
             $router->post('/refreshtoken','AuthController@refreshToken');
 
             $router->post('/product','ProductController@store');
-            $router->get('/product/{id}','ProductController@show');
+            $router->get('/product/{id}','ProductController@getProductOfCurrentUser');
             $router->get('/products','ProductController@getProductsOfCurrentUser');
             $router->delete('/product/{id}','ProductController@destroy');
             $router->post('/updateProduct/{id}','ProductController@update');
@@ -66,6 +70,11 @@ $router->group(['prefix'=>'api'], function () use ($router){
             $router->get('/addresses','UserController@getAddresses');
             $router->get('/address/{id}','UserController@getAddress');
             $router->put('/address/{id}','UserController@updateAddress');
+
+            $router->post('/addtocart/{productId}','CartController@addToCart');
+            $router->get('/cart','CartController@showCart');
+            $router->post('/removefromcart/{productId}','CartController@RemoveFromCart');
+            $router->post('/cart/setquantity/{productId}','CartController@setQuantity');
         });
 
     });

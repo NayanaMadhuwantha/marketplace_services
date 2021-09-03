@@ -14,8 +14,8 @@ class AddSubCategoryRelationToProduct extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->unsignedBigInteger('sub_category_id')->unsigned()->nullable();
-            $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('cascade');
+            $table->unsignedBigInteger('product_sub_category_id')->unsigned()->nullable();
+            $table->foreign('product_sub_category_id')->references('id')->on('product_sub_categories')->onDelete('cascade');
         });
     }
 

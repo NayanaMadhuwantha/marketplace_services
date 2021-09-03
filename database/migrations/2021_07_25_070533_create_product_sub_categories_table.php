@@ -17,8 +17,8 @@ class CreateProductSubCategoriesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->unsignedBigInteger('category_id')->unsigned()->nullable();
-            $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('cascade');
+            $table->unsignedBigInteger('product_category_id')->unsigned()->nullable();
+            $table->foreign('product_category_id')->references('id')->on('product_categories')->onDelete('cascade');
             $table->timestamps();
         });
     }

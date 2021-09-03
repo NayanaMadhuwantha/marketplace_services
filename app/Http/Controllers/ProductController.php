@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,9 @@ class ProductController extends Controller
                 'status' => 'required|in:available,soldOut',
                 'quantity' => 'required',
                 'currentPrice' => 'required',
-                'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000'
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000',
+                'categoryId' => 'required',
+                'subCategoryId' => 'required'
             ]);
 
             if ($validator->fails()) {
@@ -45,18 +48,30 @@ class ProductController extends Controller
             $file = $request->file('thumbnail');
             $filePath = $file->store('public/product_thumbnails');
 
-            $product = Product::create([
-                'name'=>$request->name,
-                'description'=>$request->description,
-                'specifications'=>$request->specifications,
-                'status'=>$request->status,
-                'quantity'=>$request->quantity,
-                'basePrise'=>$request->basePrise,
-                'thumbnailLink'=>$filePath,
-                'currentPrice'=>$request->currentPrice,
-            ]);
+            $product = null;
+            $subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
 
-            $user->products()->save($product);
+            if ($subCategory){
+                $product = Product::create([
+                    'name'=>$request->name,
+                    'description'=>$request->description,
+                    'specifications'=>$request->specifications,
+                    'status'=>$request->status,
+                    'quantity'=>$request->quantity,
+                    'basePrise'=>$request->basePrise,
+                    'thumbnailLink'=>$filePath,
+                    'currentPrice'=>$request->currentPrice,
+                ]);
+
+                $user->products()->save($product);
+                $subCategory->products()->save($product);
+            }
+            else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product sub category not found'
+                ]);
+            }
 
             if (!empty($product)){
                 $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
@@ -93,6 +108,28 @@ class ProductController extends Controller
         return $product;
     }
 
+    public function getProductOfCurrentUser($id)
+    {
+        $product = Product::find($id);
+
+        if (!$product){
+            return response()->json([
+                'status'=>'error',
+                'message'=>'Product not found for id '.$id
+            ]);
+        }
+
+        if($product->user->id!=User::getCurrentUser()->id){
+            return response()->json([
+                'status'=>'error',
+                'message'=>'Product not found'
+            ]);
+        }
+
+        $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        return $product;
+    }
+
     public function update(Request $request, $id)
     {
         try {
@@ -121,7 +158,7 @@ class ProductController extends Controller
             if($product->user->id!=User::getCurrentUser()->id){
                 return response()->json([
                     'status'=>'error',
-                    'message'=>'Product is belongs to another user'
+                    'message'=>'Product not found'
                 ]);
             }
 
@@ -187,5 +224,9 @@ class ProductController extends Controller
             $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
         }
         return $products;
+    }
+
+    public function getProductsByCategory($categoryId,$subcategoryId){
+        return ProductCategory::find($categoryId)->subcategories->find($subcategoryId)->products()->paginate(20);
     }
 }

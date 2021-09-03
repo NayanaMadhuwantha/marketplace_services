@@ -41,6 +41,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->hasMany(AddressBook::class);
     }
 
+    public function carts(){
+        return $this->hasMany(Cart::class);
+    }
+
     public static function getCurrentUser(){
         $userId = Auth::id();
         return User::find($userId);
