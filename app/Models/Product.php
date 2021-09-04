@@ -13,11 +13,14 @@ class Product extends Model
         'status',
         'quantity',
         'rating',
-        'popularity',
-        'trending',
         'basePrise',
         'currentPrice',
         'thumbnailLink'
+    ];
+
+    protected $hidden = [
+        //'trending',
+        'popularity',
     ];
 
     public function user(){

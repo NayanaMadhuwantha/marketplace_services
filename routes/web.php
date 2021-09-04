@@ -21,10 +21,19 @@ $router->group(['prefix'=>'api'], function () use ($router){
     $router->post('/register','AuthController@register');
     $router->post('/login','AuthController@login');
 
-    $router->get('/products', 'ProductController@index');
-    $router->get('/products/categories', 'ProductCategoryController@getCategories');
-    $router->get('/product/{id}','ProductController@show');
-    $router->get('/product/{categoryId}/{subcategoryId}','ProductController@getProductsByCategory');
+    $router->get('product/{id}','ProductController@show');
+
+    $router->group(['prefix'=>'products'], function () use ($router){
+        $router->get('/', 'ProductController@index');
+        $router->get('/categories', 'ProductCategoryController@getCategories');
+        $router->get('/{categoryId}/subcategories', 'ProductCategoryController@getSubCategories');
+        $router->get('/{categoryId}/{subcategoryId}','ProductController@getProductsByCategory');
+
+        $router->get('/popular','ProductController@getPopularProducts');
+        $router->get('/trending','ProductController@getTrendingProducts');
+        $router->post('/incrementPopularity/{productId}','ProductController@incrementPopularity');
+        $router->post('/incrementTrend/{productId}','ProductController@incrementTrend');
+    });
 
     $router->group(['middleware'=>'auth'],function() use ($router){
 
@@ -44,7 +53,6 @@ $router->group(['prefix'=>'api'], function () use ($router){
 
             //Product Sub Categories
             $router->post('/{categoryId}/subcategory', 'ProductCategoryController@storeSubCategory');
-            $router->get('/{categoryId}/subcategories', 'ProductCategoryController@getSubCategories');
             $router->get('/{categoryId}/subcategory/{id}', 'ProductCategoryController@showSubCategory');
 
             //later

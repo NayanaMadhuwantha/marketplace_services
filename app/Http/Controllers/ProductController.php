@@ -229,4 +229,67 @@ class ProductController extends Controller
     public function getProductsByCategory($categoryId,$subcategoryId){
         return ProductCategory::find($categoryId)->subcategories->find($subcategoryId)->products()->paginate(20);
     }
+    public function incrementTrending(){
+
+    }
+    public function incrementPopularity($productId){
+        try {
+            $product = Product::find($productId);
+            if($product->popularity){
+                $product->popularity++;
+            }
+            else{
+                $product->popularity=1;
+            }
+            $product->save();
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+            return $product;
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+    public function getPopularProducts(){
+        //$products = Product::all()->where('popularity','>','0')->sortByDesc('popularity');
+        $queryProducts = Product::query();
+        $queryProducts->orderBy('popularity','desc');
+        $queryProducts->where('popularity','>','0');
+        $products = $queryProducts->paginate(10);
+        foreach ($products as $product){
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        }
+        return $products;
+    }
+    public function incrementTrend($productId){
+        try {
+            $product = Product::find($productId);
+            if($product->trending){
+                $product->trending++;
+            }
+            else{
+                $product->trending=1;
+            }
+            $product->save();
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+            return $product;
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function getTrendingProducts(){
+        $queryProducts = Product::query();
+        $queryProducts->orderBy('trending','desc');
+        $queryProducts->where('trending','>','0');
+        $products = $queryProducts->paginate(10);
+        foreach ($products as $product){
+            $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        }
+        return $products;
+    }
 }
