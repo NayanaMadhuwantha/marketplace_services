@@ -12,7 +12,9 @@ class UserController extends Controller
     public function getCurrentUser(Request $request){
         $user = User::find(Auth::id());
         $profileImagePath = $user->ProfileImageLink;
-        $user->ProfileImageLink=env("APP_URL")."/".$profileImagePath;
+        if ($profileImagePath){
+            $user->ProfileImageLink=env("APP_URL")."/".$profileImagePath;
+        }
         return $user;
     }
 

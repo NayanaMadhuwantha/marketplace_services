@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductSubCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ class ProductController extends Controller
                 'quantity' => 'required',
                 'currentPrice' => 'required',
                 'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000',
-                'categoryId' => 'required',
+                //'categoryId' => 'required',
                 'subCategoryId' => 'required'
             ]);
 
@@ -49,8 +50,8 @@ class ProductController extends Controller
             $filePath = $file->store('public/product_thumbnails');
 
             $product = null;
-            $subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
-
+            //$subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
+            $subCategory = ProductSubCategory::find($request->subCategoryId);
             if ($subCategory){
                 $product = Product::create([
                     'name'=>$request->name,
@@ -87,6 +88,83 @@ class ProductController extends Controller
                     'message'=>'Product not created'
                 ]);
             }
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function storeExternalProduct(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'description' => 'required',
+                'status' => 'required|in:available,soldOut',
+                'quantity' => 'required',
+                'currentPrice' => 'required',
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|max:1000',
+                //'categoryId' => 'required',
+                'subCategoryId' => 'required',
+                'externalLink' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
+
+            $user = User::getCurrentUser();
+
+            $file = $request->file('thumbnail');
+            $filePath = null;
+            if ($file) {
+                $filePath = $file->store('public/product_thumbnails');
+            }
+
+            //$subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
+            $subCategory = ProductSubCategory::find($request->subCategoryId);
+            if ($subCategory){
+                $product = Product::create([
+                    'name'=>$request->name,
+                    'description'=>$request->description,
+                    'specifications'=>$request->specifications,
+                    'status'=>$request->status,
+                    'quantity'=>$request->quantity,
+                    'basePrise'=>$request->basePrise,
+                    'thumbnailLink'=>$filePath,
+                    'currentPrice'=>$request->currentPrice,
+                    'externalLink'=>$request->externalLink,
+                    'isExternal' => 1
+                ]);
+
+                $user->products()->save($product);
+                $subCategory->products()->save($product);
+            }
+            else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product sub category not found'
+                ]);
+            }
+
+            if (!empty($product)){
+                if($product->thumbnailLink){
+                    $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+                }
+                return response()->json([
+                    'status'=>'success',
+                    'message'=>'Product created successfully',
+                    'product'=> $product
+                ]);
+            }
+            else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product not created'
+                ]);
+            }
+
         }catch (\Exception $e){
             return response()->json([
                 'status'=>'error',
@@ -141,6 +219,12 @@ class ProductController extends Controller
                     'message'=>'Product not found for id '.$id
                 ]);
             }
+            if ($product->isExternal){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'This is a external product'
+                ]);
+            }
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required',
@@ -148,7 +232,9 @@ class ProductController extends Controller
                 'status' => 'required|in:available,soldOut',
                 'quantity' => 'required',
                 'currentPrice' => 'required',
-                'thumbnail' => 'mimes:jpeg,jpg,png,gif|required|max:1000'
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|max:1000',
+                //'categoryId' => 'required',
+                'subCategoryId' => 'required'
             ]);
 
             if ($validator->fails()) {
@@ -162,34 +248,140 @@ class ProductController extends Controller
                 ]);
             }
 
-            $product->name=$request->name;
-            $product->description=$request->description;
-            $product->specifications=$request->specifications;
-            $product->status=$request->status;
-            $product->quantity=$request->quantity;
-            $product->basePrise=$request->basePrise;
-            $product->currentPrice=$request->currentPrice;
 
-            $file = $request->file('thumbnail');
-            if ($file){
-                $filePath = $file->store('public/product_thumbnails');
-                $product->thumbnailLink=$filePath;
-            }
+            //$subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
+            $subCategory = ProductSubCategory::find($request->subCategoryId);
 
-            if ($product->save()){
-                $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
-                return response()->json([
-                    'status'=>'success',
-                    'message'=>'Product updated successfully',
-                    'product'=>$product
-                ]);
+            if ($subCategory){
+                $product->name=$request->name;
+                $product->description=$request->description;
+                $product->specifications=$request->specifications;
+                $product->status=$request->status;
+                $product->quantity=$request->quantity;
+                $product->basePrise=$request->basePrise;
+                $product->currentPrice=$request->currentPrice;
+
+                $file = $request->file('thumbnail');
+                if ($file){
+                    $filePath = $file->store('public/product_thumbnails');
+                    $product->thumbnailLink=$filePath;
+                }
+
+                if ($product->save()){
+                    $subCategory->products()->save($product);
+                    $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+                    unset($product->user);
+                    return response()->json([
+                        'status'=>'success',
+                        'message'=>'Product updated successfully',
+                        'product'=>$product
+                    ]);
+                }
+                else{
+                    return response()->json([
+                        'status'=>'error',
+                        'message'=>'Product not updated'
+                    ]);
+                }
             }
             else{
                 return response()->json([
                     'status'=>'error',
-                    'message'=>'Product not updated'
+                    'message'=>'Product sub category not found'
                 ]);
             }
+
+        }catch (\Exception $e){
+            return response()->json([
+                'status'=>'error',
+                'message'=>$e->getMessage()
+            ]);
+        }
+    }
+
+    public function updateExternalProduct(Request $request,$id){
+        try {
+            $product = Product::find($id);
+
+            if (!$product){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product not found for id '.$id
+                ]);
+            }
+            if (!$product->isExternal){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'This is not a external product'
+                ]);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'description' => 'required',
+                'status' => 'required|in:available,soldOut',
+                'quantity' => 'required',
+                'currentPrice' => 'required',
+                'thumbnail' => 'mimes:jpeg,jpg,png,gif|max:1000',
+                //'categoryId' => 'required',
+                'subCategoryId' => 'required',
+                'externalLink' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return $validator->errors();
+            }
+
+            if($product->user->id!=User::getCurrentUser()->id){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product not found'
+                ]);
+            }
+
+            //$subCategory = ProductCategory::find($request->categoryId)->subCategories->find($request->subCategoryId);
+            $subCategory = ProductSubCategory::find($request->subCategoryId);
+            if ($subCategory){
+                $product->name=$request->name;
+                $product->description=$request->description;
+                $product->specifications=$request->specifications;
+                $product->status=$request->status;
+                $product->quantity=$request->quantity;
+                $product->basePrise=$request->basePrise;
+                $product->currentPrice=$request->currentPrice;
+
+                $file = $request->file('thumbnail');
+                if ($file){
+                    $filePath = $file->store('public/product_thumbnails');
+                    $product->thumbnailLink=$filePath;
+                }
+
+                if ($product->save()){
+                    $subCategory->products()->save($product);
+                    $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+                    unset($product->user);
+                    return response()->json([
+                        'status'=>'success',
+                        'message'=>'Product updated successfully',
+                        'product'=>$product
+                    ]);
+                }
+                else{
+                    return response()->json([
+                        'status'=>'error',
+                        'message'=>'Product not updated'
+                    ]);
+                }
+
+
+            }else{
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Product sub category not found'
+                ]);
+            }
+
+
         }catch (\Exception $e){
             return response()->json([
                 'status'=>'error',
@@ -226,12 +418,19 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function getProductsByCategory($categoryId,$subcategoryId){
-        return ProductCategory::find($categoryId)->subcategories->find($subcategoryId)->products()->paginate(20);
+    public function getProductsByCategory($subcategoryId){
+        $subCategory = ProductSubCategory::find($subcategoryId);
+        if ($subCategory){
+            return $subCategory->products()->paginate(20);
+        }
+        else{
+            return response()->json([
+                'status'=>'error',
+                'message'=>'Product sub category not found'
+            ]);
+        }
     }
-    public function incrementTrending(){
 
-    }
     public function incrementPopularity($productId){
         try {
             $product = Product::find($productId);
@@ -290,6 +489,12 @@ class ProductController extends Controller
         foreach ($products as $product){
             $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
         }
+        return $products;
+    }
+
+    public function productCount(){
+        $user = User::getCurrentUser();
+        $products = $user->products()->count();
         return $products;
     }
 }

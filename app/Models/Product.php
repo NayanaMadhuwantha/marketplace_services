@@ -12,14 +12,15 @@ class Product extends Model
         'specifications',
         'status',
         'quantity',
-        'rating',
         'basePrise',
         'currentPrice',
-        'thumbnailLink'
+        'thumbnailLink',
+        'externalLink',
+        'isExternal'
     ];
 
     protected $hidden = [
-        //'trending',
+        'trending',
         'popularity',
     ];
 

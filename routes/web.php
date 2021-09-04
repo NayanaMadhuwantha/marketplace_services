@@ -26,8 +26,9 @@ $router->group(['prefix'=>'api'], function () use ($router){
     $router->group(['prefix'=>'products'], function () use ($router){
         $router->get('/', 'ProductController@index');
         $router->get('/categories', 'ProductCategoryController@getCategories');
+        $router->get('/category/{id}', 'ProductCategoryController@showCategory');
         $router->get('/{categoryId}/subcategories', 'ProductCategoryController@getSubCategories');
-        $router->get('/{categoryId}/{subcategoryId}','ProductController@getProductsByCategory');
+        $router->get('/bySubCategory/{subcategoryId}','ProductController@getProductsByCategory');
 
         $router->get('/popular','ProductController@getPopularProducts');
         $router->get('/trending','ProductController@getTrendingProducts');
@@ -45,13 +46,10 @@ $router->group(['prefix'=>'api'], function () use ($router){
         $router->delete('/posts/{id}', 'PostController@destroy');
 
         $router->group(['prefix'=>'products'], function () use ($router){
-            //Product Categories
             $router->post('/category', 'ProductCategoryController@storeCategory');
-            $router->get('/category/{id}', 'ProductCategoryController@showCategory');
             $router->put('/category/{id}', 'ProductCategoryController@updateCategory');
             $router->delete('/category/{id}', 'ProductCategoryController@deleteCategory');
 
-            //Product Sub Categories
             $router->post('/{categoryId}/subcategory', 'ProductCategoryController@storeSubCategory');
             $router->get('/{categoryId}/subcategory/{id}', 'ProductCategoryController@showSubCategory');
 
@@ -64,10 +62,13 @@ $router->group(['prefix'=>'api'], function () use ($router){
             $router->post('/refreshtoken','AuthController@refreshToken');
 
             $router->post('/product','ProductController@store');
+            $router->post('/product/externalProduct','ProductController@storeExternalProduct');
             $router->get('/product/{id}','ProductController@getProductOfCurrentUser');
             $router->get('/products','ProductController@getProductsOfCurrentUser');
+            $router->get('/products/productCount','ProductController@productCount');
             $router->delete('/product/{id}','ProductController@destroy');
             $router->post('/updateProduct/{id}','ProductController@update');
+            $router->post('/updateExternalProduct/{id}','ProductController@updateExternalProduct');
 
             $router->get('/currentuser','UserController@getCurrentUser');
             $router->post('/upload/profilepicture','UserController@uploadProfilePicture');

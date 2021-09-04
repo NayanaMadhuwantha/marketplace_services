@@ -25,7 +25,9 @@ class CreateProductsTable extends Migration
             $table->integer('trending')->nullable();
             $table->double('basePrise')->nullable();
             $table->double('currentPrice');
-            $table->string('thumbnailLink');
+            $table->string('thumbnailLink')->nullable();
+            $table->string('externalLink')->nullable();
+            $table->boolean('isExternal')->default(0);
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
