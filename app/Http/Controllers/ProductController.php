@@ -18,6 +18,8 @@ class ProductController extends Controller
         $products = Product::paginate(20);
         foreach ($products as $product){
             $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+            $productSubCategory = ProductSubCategory::find($product->product_sub_category_id);
+            $product->product_category_id = ProductCategory::find($productSubCategory->product_category_id)->id;
         }
         return $products;
     }
@@ -183,6 +185,8 @@ class ProductController extends Controller
             ]);
         }
         $product->thumbnailLink = env("APP_URL")."/".$product->thumbnailLink;
+        $productSubCategory = ProductSubCategory::find($product->product_sub_category_id);
+        $product->product_category_id = ProductCategory::find($productSubCategory->product_category_id)->id;
         return $product;
     }
 
